@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Credo HOWTO</title>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+</head>
+<body>
+<h1>Credo HOWTO</h1>
+<h2>Create your own Credo file signkey</h2>
+<h3>Necessary software</h3>
+I used the JDK 1.4 from Sun.<br>
+<h3>Generate your key</h3>
+Run the command (you can replace 'oav' with anything you want in this and
+the following commands)<br>
+<pre>keytool -genkey -alias oav -validity&nbsp;730 -keystore oav.keystore</pre>
+and answer the questions. This will generate a key with a validity of 2 years.<br>
+<b>Important:</b> Just use ASCII characters when answering the questions or we will be unable to sign your request!
+<h3>Generate a certification request</h3>
+Run the command<br>
+<pre>keytool -certreq -alias oav -keystore oav.keystore -file oav.certreq<br></pre>
+Send the file 'oav.certreq' to <a href="mailto:signatures@openantivirus.org">signatures@openantivirus.org</a> and convince us, that you are the one your
+pretend to be ;-)<br>
+<h3>Importing the certificates</h3>
+First you have to import the CA certficate from the OpenAntivirus Project:<br>
+<pre>keytool -import -alias oavlevel4 -keystore oav.keystore -file oav.cer.level4</pre>
+The level depends on the level that you have been assigned from the CA. You
+can find the 'oav.cer.level?' files in the JAR-files and on the webpage.
+Then you can import the certificate from the CA:<br>
+<pre>keytool -import -alias oav -keystore oav.keystore -file oav.der</pre>
+<h3>Generating Credo files</h3>
+Credo files are simple JAR-files. Create them like this:<br>
+<pre>jar cvf VirusSignatures.credo virussignatures.strings</pre>
+<h3>Signing Credo files</h3>
+With your signed key, you can sign your Credo files:<br>
+<pre>jarsigner -keystore oav.keystore VirusSignatures.credo oav<br></pre>
+That's it. Have fun!<br>
+<h2>Being your own certification authority (CA)</h2>
+If you have any reason to trust our code but not our master keys, this is
+how to generate your own keys. You have to replace the files in the 'certificates'
+directory of the corresponding JAR-files, so that they work. This is more
+a documentation for us, so that we know how we did it.<br>
+<h3>Necessary software</h3>
+I used the OpenSSL package that came with SuSE Linux 8.0<br>
+<h3>Generating the keys</h3>
+Create a new directory, then issue the following (Linux-)commands:<br>
+<pre>mkdir demoCA<br>mkdir demoCA/certs<br>mkdir demoCA/crl<br>mkdir demoCA/newcerts<br>mkdir demoCA/private<br>echo "01" &gt; demoCA/serial<br>touch demoCA/index.txt<br>openssl&nbsp;req -new -x509 -keyout demoCA/private/cakey.pem -out demoCA/cacert.pem -newkey rsa:1024 -days 1826<br></pre>
+This will generate a new CA-key that is valid for about 5 years and has a
+RSA modulus with 1024 bits. If you want to do it right, you need 4 keys for
+the 4 levels. The keytool from Sun does not like the PEM format, so you have
+to convert it to DER:<br>
+<pre>openssl x509 -outform der -in demoCA/cacert.pem -out oav.cer.level1</pre>
+<h3>Signing certification requests</h3>
+Now you can sign certification requests:<br>
+<pre>openssl ca -cert demoCA/cacert.pem -policy policy_anything -days&nbsp;365 -infiles oav.certreq</pre>
+This will sign the 'oav.certreq' for 365 days. You have to convert this to
+DER format, too:<br>
+<pre>openssl x509 -outform der -in demoCA/newcerts/01.pem -out oav.der</pre>
+This file can be sent back to the applicant.<br>
+<br>
+<h6>$Id: Credo-Howto.html,v 1.3 2002/10/07 22:19:11 kurti Exp $</h6>
+</body>
+</html>

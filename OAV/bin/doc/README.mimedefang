@@ -1,0 +1,70 @@
+Date: Fri, 21 Dec 2001 15:13:15 -0500 (EST)
+From: "David F. Skoll" <dfs@roaringpenguin.com>
+Subject: Re: [Mimedefang] Support for Openantivirus
+
+On Wed, 19 Dec 2001, Kurt Huwig wrote:
+
+> I added support for OpenAntivirus' (http://www.openantivirus.org)
+> ScannerDaemon to AMaViS. A user of OAV requested a plugin for
+> MIMEDefang. IMHO, this should be not that problem, as both AMaViS and
+> MIMEDefang are written in Perl.
+
+It's very easy.  Here's the equivalent code for MIMEDefang.  I have NOT
+tested it. :-)  If you could get someone to test the code, I will integrate
+it into the mainstream MIMEDefang release.
+
+These routines operate like the other similarly-named routines in
+MIMEDefang.
+
+use IO::Socket;
+
+sub message_contains_virus_openantivirus {
+	my $sock = IO::Socket::INET->new('127.0.0.1:8127');
+	if (defined $sock) {
+		my($cwd);
+		chomp($cwd = `pwd`);
+		$sock->print("SCAN $cwd/INPUTMSG\n");
+		$sock->flush;
+		chomp($output = $sock->getline);
+		$sock->close;
+		if ($output =~ /^FOUND: /) {
+			$VirusScannerMessages .= "$output\n";
+ 			return 1;
+		}
+		return 0;
+ 	}
+	} else {
+ 		do_log(0,"Virus scanner failure: can't connect to daemon");
+	}
+}
+
+sub entity_contains_virus_openantivirus {
+	my($entity) = @_;
+	my $sock = IO::Socket::INET->new('127.0.0.1:8127');
+	if (defined $sock) {
+		my($cwd);
+		chomp($cwd = `pwd`);
+		my $path = $entity->bodyhandle->path;
+		# If path is not absolute, add cwd
+		if (! ($path =~ m+^/+)) {
+			$path = $cwd . "/" . $path;
+		}
+		$sock->print("SCAN $path\n");
+		$sock->flush;
+		chomp($output = $sock->getline);
+		$sock->close;
+		if ($output =~ /^FOUND: /) {
+			$VirusScannerMessages .= "$output\n";
+ 			return 1;
+		}
+		return 0;
+ 	}
+	} else {
+ 		do_log(0,"Virus scanner failure: can't connect to daemon");
+	}
+}
+
+--
+David.
+
+http://www.roaringpenguin.com/mimedefang/

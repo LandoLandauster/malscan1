@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+               
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <title>PatternFinder - Howto</title>
+</head>
+  <body>
+       
+<h1>PatternFinder Howto</h1>
+    The PatternFinder tries to figure out what pattern of a virus a scanners
+  looks for. It does this, by systematically overwriting parts of the virus-file
+  and checking whether the scanner still detects the virus.<br>
+       
+<h2>Necessary software</h2>
+    You need an installed Java 2 Runtime Environment, Standard Edition (JRE)
+  . Every JRE &gt;= 1.2 should be fine, but I just tested it with 1.3.1.
+You   can get it from Sun at <a href="http://java.sun.com/j2se/">http://java.sun.com/j2se/</a>
+    .<br>
+       
+<h2>Usage</h2>
+    You have to tell PatternFinder which virus-scanner to use (maybe with
+path), how to get the virusname from the scanner output and which files to
+scan, e.g.<br>
+ 
+<pre>java -jar PatternFinder.jar antivir 32 2 "'" "'" Codered2.exe<br></pre>
+    You can also give more than one file<br>
+ 
+<pre>java -jar PatternFinder.jar antivir 32 2 "'" "'" Codered2.exe Nimda.eml<br></pre>
+ The full usage is:<br>
+ 
+<pre>java -jar PatternFinder &lt;scannercommand&gt; &lt;# of workers&gt; &lt;# of lines to skip&gt; &lt;prefix&gt; &lt;postfix&gt; &lt;filename&gt; [&lt;filename&gt;...]</pre>
+ 
+<ul>
+   <li>&lt;scannercommand&gt;: name of a virusscanner executable</li>
+   <li>&lt;# of workers&gt;: how many workers should be started at once;
+for every worker, a temporary file is generated. 32 is a good value for this. 
+Don't use much more, as PatternFinder uses one ASCII character appended to 
+the filename and there are not so many characters out there...</li>
+   <li>&lt;# of lines to skip&gt;: number of lines to ignore in the output 
+of the scanner after the name of the test file</li>
+   <li>&lt;prefix&gt;: prefix of the virusscanner to the virusname</li>
+   <li>&lt;postfix&gt;: postfix of the virusscanner to the virusname<br>
+   </li>
+ 
+</ul>
+ The PatternFinder has to parse the output of the virus scanner to determine 
+if one of its testfiles is infected and which virus was detected. Just run 
+your favorite virus scanner on an infected file and look at the output. If 
+it looks like this<br>
+ 
+<pre>/home/kurt/Codered2.exe<br> Date: 23.12.2001&nbsp; Time: 04:19:02&nbsp; Size: 3818<br> VIRUS: file contains a signature of the virus&nbsp; 'Worm/CodeRed.2'</pre>
+ then we have to skip 2 lines to get to the name (the line with the file
+itself is counted too) and the prefix and posfix of the signature is a single
+quote ('). If it looks like this<br>
+ 
+<pre>/home/kurt/Codered2.exe<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Found the W32/CodeRed.c.worm virus !!!</pre>
+ then we have to skip 1 line and the prefix is 'Found' and the postfix is 
+' !!!'. This is what I use:<br>
+ <br>
+ 
+<table cellpadding="2" cellspacing="2" border="1">
+   <tbody>
+     <tr>
+       <td valign="top">Virus scanner<br>
+       </td>
+       <td valign="top">parameters to PatternFinder<br>
+       </td>
+     </tr>
+     <tr>
+       <td valign="top">F-Prot<br>
+       </td>
+       <td valign="top">0 "Infection: " ""<br>
+       </td>
+     </tr>
+     <tr>
+     <tr>
+       <td valign="top">H+B EDV antivir<br>
+       </td>
+       <td valign="top">2 "'" "'"<br>
+       </td>
+     </tr>
+     <tr>
+       <td valign="top">NAI uvscan<br>
+       </td>
+       <td valign="top">1 "Found" '!!!'<br>
+       </td>
+     </tr>
+   
+  </tbody> 
+</table>
+ <br>
+ <b>Hint: </b>If you are running Linux and activated the executable Jar-file
+  support documented in '/usr/src/linux/Documentation/java.txt', you can
+omit   the 'java -jar' if you make the Jar-file executable.<br>
+   <br>
+ After that, there is a file called 'virus.0.infected' which contains   the
+cleared version of the file that is still detected as being infected and
+another file called 'virus.0.cleared' that contains everything, but the infected
+parts. If a file has multiple infections, the algorithm is started several
+times and you will get files called 'virus.1.infected' and 'virus.1.cleared'
+a.s.o.<br>
+ 
+<h2>Output</h2>
+ The PatternFinder uses System.err for status messages and System.out for 
+lines like<br>
+ 
+<pre>Worm/CodeRed.2=50ff559c8d855cfeffff50ff55988b40108b08898d58feffffff55e43d040400000f94c13d040800000f94c50acd0fb6c9898d54feffff8b7508817e309a0200000f84c4000000c746309a020000e80a000000436f64655265644949008b1c24ff55d8660bc00f958538feffffc78550<br>BDS/VirtualRoot=680401000068d0204000e8610100008db8d0204000be00204000a5a5a5a56a0168d0204000e84c010000e80c00000068c0270900e831010000ebef68d8244000683f000f006a0068102040006802000080e8320100000bc075266a0468542040006a046a006848204000ff35d8244000</pre>
+ If this line has <b>no spaces</b> in it, you can put these lines into the 
+'virussignatures.txt' of ScannerDaemon and it will detect this virus. If you
+want to do this in one line, use it like<br>
+ 
+<pre>java -jar PatternFinder.jar antivir 32 2 "'" "'" Codered2.exe Nimda.eml &gt;&gt; virussignatures.txt<br></pre>
+ <b>Important:</b> Do not use it like '&gt; virussignatures.txt' as this
+will overwrite the old file!<br>
+ <br>
+   <b>Currently, the PatternFinder does a lousy job on Microsoft Office 
+file formats. This will be fixed in a future version.</b>   
+<h2>How can I help?<br>
+  </h2>
+  If the PatternFinder detects <b>just one long signature</b>, this is very
+ likely to be the one we need to detect this virus. But without deep knowledge
+ about the inner workings of the virus, noone knows for sure.<br>
+  <br>
+   Please <a href="mailto:signatures@openantivirus.org">send</a>    the patterns 
+you found to the <a href="http://www.openantivirus.org/">OpenAntiVirus-Project</a>
+    , so that we can include it in our database.<br>
+       
+<h6>$Id: PatternFinder-Howto.html,v 1.7 2002/02/16 10:27:22 kurti Exp $<br>
+    </h6>
+       
+</body>
+</html>

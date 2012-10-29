@@ -1,0 +1,35 @@
+Using the ScannerDaemon of OpenAntivirus together with AMaViS-perl is quite
+simple. Just edit your 'amavis' file to have this in the init section (if
+you use amavis-perl-11, you have to configure it with '--enable-all'):
+
+# OpenAntivirus
+my $oav = "yes";
+
+and this where all the other scanners are called. I put it before all other
+scanners, so it get's called first and I can see if any of the commercial
+scanners find something ScannerDaemon doesn't.
+
+#
+# OpenAntivirus (Daemon)
+#
+
+use IO::Socket;
+if ($oav) {
+	my $sock = IO::Socket::INET->new('127.0.0.1:8127');
+	if (defined $sock) {
+		$sock->print("SCAN $TEMPDIR/parts\n");
+		$sock->flush;
+		chomp($output = $sock->getline);
+		$sock->close;
+		if ($output =~ /^FOUND: /) {
+			@virusname = ($output =~ /FOUND: (.+)/g);
+			do_virus($output);
+		}
+	} else {
+		do_log(0,"Virus scanner failure: can't connect to daemon");
+	}
+}
+
+That's it. Just make sure that the Daemon is always running.
+
+http://www.amavis.org/

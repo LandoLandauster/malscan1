@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>ScannerDaemon - Howto</title>
+</head>
+<body>
+<h1>ScannerDaemon Howto</h1>
+The ScannerDaemon listens on localhost's port 8127 for absolute
+filenames and absolute directorynames. It scans the files/all files in
+the directory and reports 'OK' if no virus has been found or 'FOUND:
+&lt;virusname&gt;' if a virus has been detected.<br>
+<h2>Necessary software</h2>
+You need an installed Java 2 Runtime Environment, Standard Edition
+(JRE), . Every JRE &gt;= 1.2 should be fine, but I just tested it with
+1.4. You can get it from Sun at <a href="http://java.sun.com/j2se/">http://java.sun.com/j2se/</a>
+.<br>
+<br>
+You do also need at least one Credo-file that came with the
+ScannerDaemon in a subdirectory 'credo' of the directory where you
+start the ScannerDaemon. Otherwise give the fill path on the command
+line.<br>
+<h2>Usage</h2>
+You start the ScannerDaemon simply by entering<br>
+<pre>java -jar&nbsp;ScannerDaemon.jar<br></pre>
+If you did not forget the Credo-files, it should come up and listen
+on port 8127. You can also give the name of the directory as a
+command-line parameter, like<br>
+<pre>java -jar&nbsp;ScannerDaemon.jar -credo.directory &lt;other-directory&gt;<br></pre>
+<b>Hint: </b>If you are running Linux and activated the executable
+Jar-file support documented in '/usr/src/linux/Documentation/java.txt',
+you can omit the 'java -jar' if you make the Jar-file executable.<br>
+<h3>Symbolic links</h3>
+ScannerDaemon does not follow symbolic links. I you want this, give the
+option
+'-vfs.follow-symlinks yes' on the command line.
+<h3>Temporary directory</h3>
+A temporary directory is needed to scan several filetypes. You should
+specify
+a diretory where to put these files with the option
+'-engine.tempdirectory &lt;other-directory&gt;<directory>'.
+Otherwise, the subdirectory 'temp'.
+</directory>
+<h3>Digital signature</h3>
+The Credo-files are digitally signed with keys which were digitally
+signed
+from the OpenAntivirus project. This signature is checked automatically
+on
+startup and execution is aborted if the signature does not exist or is
+invalid.
+You can disable this with the option '-nosignature'. <b>You have to do
+this,
+if you want to run ScannerDaemon with Kaffe or other JVMs that do not
+support
+the JCE (cryptography stuff).</b><br>
+<h3>Scan<br>
+</h3>
+Now you can connect to port 8127 and send absolute filenames or
+absolute directorynames ended by &lt;CR&gt;/&lt;LF&gt;. Use 'telnet' or
+'netcat'
+for this.<br>
+<br>
+<b>Example:<br>
+</b>
+<pre>kurt@lobo:~ &gt; <b>telnet localhost 8127</b><br>Trying 127.0.0.1...<br>Connected to localhost.<br>Escape character is '^]'.<br><b>SCAN /home/kurt/MTX.pif</b><br>FOUND: W95/Matrix.SCR<br>Connection closed by foreign host.<br><br>kurt@lobo:~ &gt; <b>echo "SCAN /home/kurt/Fix2001.exe" | netcat localhost 8127</b><br>FOUND: TR/IWorm.Fix2001<br></pre>
+Have fun!<br>
+<h3>Post</h3>
+You can also send files directly to the scanner. This is done by
+sending <b>POST</b> to the daemon. It answers with a port where you
+have to send
+the files to:<br>
+<pre><br>kurt@lobo:~&gt; <b>telnet localhost 8127</b><br>Trying 127.0.0.1...<br>Connected to localhost.<br>Escape character is '^]'.<b><br>POST</b><br>Send data to port '34705' within 10 seconds.</pre>
+<pre>kurt@lobo:~&gt; <b>cat eicar | netcat localhost 34705</b></pre>
+<pre>Connected.<br>FOUND: Eicar-Test-Signatur<br></pre>
+The socket is closed if a virus is found, so be prepared for this.<br>
+<h3>Filter</h3>
+Similar to POST, but with an additional port that echoes all data that
+has been scanned without finding a virus.<br>
+<pre>kurt@lobo:~&gt; <b>telnet localhost 8127</b><br>Trying 127.0.0.1...<br>Connected to localhost.<br>Escape character is '^]'.<b><br>FILTER</b><br>Send/receive data to/from port '34709/34710' within 10 seconds.<br></pre>
+Both sockets are closed if soon as a virus is found, so be prepared for
+this.<br>
+<h3>Credo reload</h3>
+You can reload the Credo files by sending the string 'COMMAND CREDO
+RELOAD'
+to port 8127.<br>
+<pre>kurt@lobo:~&gt; <b>telnet localhost 8127</b><br>Trying 127.0.0.1...<br>Connected to localhost.<br>Escape character is '^]'.<b><br>COMMAND CREDO RELOAD</b><br></pre>
+The Credo files will be reloaded, e.g. aftern an update.
+<h3>Shutdown</h3>
+You can shutdown the ScannerDaemon by sending the string 'COMMAND
+SHUTDOWN'
+to port 8127.<br>
+<pre>kurt@lobo:~&gt; <b>telnet localhost 8127</b><br>Trying 127.0.0.1...<br>Connected to localhost.<br>Escape character is '^]'.<b><br>COMMAND SHUTDOWN</b><br></pre>
+ScannerDaemon will terminate immediately!<br>
+<h6>$Id: ScannerDaemon-Howto.html,v 1.10 2004/05/30 01:04:56 kurti Exp $<br>
+</h6>
+</body>
+</html>

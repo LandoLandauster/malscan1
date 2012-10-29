@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>OAV scan algorithm</title>
+</head>
+<body>
+<h1>The OpenAntivirus Scan Algorithm</h1>
+<h2>Intension</h2>
+The basic part of malware detection is pattern matching. There is no
+such thing as a "viral instruction" - viruses look alike to "normal"
+software - just their behavior makes them malwares. Therefore you have
+to analyse each malware and determine a part of it, that is unique to
+this file. It must not appear in any other file, otherwise you have a
+"false positive". A good place to find such unique parts of the virus
+are fixed strings in the file, but this does not work for all files.<br>
+<br>
+For each malware you want to detect, you get at least one byte sequence
+or "pattern". Commercial virus scanners currently detect over 80,000
+different malwares. Therefore you have to detect if one of 80,000
+patterns is
+within a given file.<br>
+<h2>Aho-Corasick<br>
+</h2>
+There are algorithms like T-search that are very fast for detecting one
+pattern in a file. But it is completely useless of you want to detect
+more than one pattern. A naive approach would be to start at the first
+byte of the file an look if any of the patterns starts at this
+position. If it is not the case, then try the second byte as start
+position and so on. So if the file starts with "ABCDE", you would look
+if a pattern starts with "ABCDE". If this is not the case, then look
+for patterns starting with "BCDE". For a file with n bytes and m
+patterns of length k to detect, you will have a runtime proportional to
+O(n*m*k) which means that your runtime is proportional to the number
+and length of patterns, which is not acceptable for practical purposes.
+Just as an example, for the current ClamAV database m*k is larger than
+1,000,000. So scanning a file is 1 million times slower than just
+reading the file. You can optimize this by stopping to compare once you
+find a difference between pattern and file thus not comparing the whole
+pattern. This reduces k to something like 2-4 on average files.<br>
+<br>
+Nevetheless ClamAV did exactly this its first version. It used the C
+function memory compare to find the patterns. This was the worst
+solution, as it is much slower than using a search tree. A search tree
+keeps the patterns sorted by there bytes, i.e. all patterns starting
+with A are in one sub-tree, all starting with B in another sub-tree.
+Then in the A-sub-tree there are more trees for pattern starting with
+AA and so on. To speed up things, ClamAV just scanned the first and
+last few KiB of the file, thus not detecting a lot of malwares.<br>
+<br>
+A better approach is <a
+ href="http://www-sr.informatik.uni-tuebingen.de/%7Ebuehler/AC/AC.html">Aho-Corasick</a>:
+the idea is to make keep the information you get while comparing the
+patterns agains the file. So if you match the patterns against the file
+and have a match up to ABC but the D does not fit, you do not start
+again from scratch. As you know that you read BCD, you can "jump" in
+your search-tree to the position where you would be after reading BCD.
+This jump is directed by the so called "failure function" which
+indicates where to jump if a byte does not fit. The good thing about
+the failure function is, that you can calculate it "offline" before you
+start scanning just by knowing the patterns to look for. The
+combination of search-tree and failure function is called "trie". With
+Aho-Corasick, runtime is proportional to O(n): no matter how many or
+how long your patterns are, your runtime only depends on the length of
+the file. You cannot get any faster as you need O(n) just to read the
+file! The nice thing is that the operation per input byte is very fast
+too. If you use an array for storing the Aho-Corasick search-tree plus
+failure function, you only have to adjust your pointer in the array for
+every byte read which is very fast.<br>
+<h2>Modified Aho-Corasick</h2>
+Aho-Corasick has one big disadvantage: memory consumption. While
+runtime is O(n), memory consumtion is for a trie based on a p-ary trie
+is O(p^k). So if your trie is based on bytes, you have O(256^k) which
+is exponentional or in other words: "very very bad". To optimize this,
+you can either reduce p or k. I deciced to reduce k as this is the
+easiest solution: instead of putting the whole pattern in the trie, you
+just put the first few bytes in it. If the Aho-Corasick finds these
+bytes, you do a linear O(m*k) pattern match for the rest of the
+patterns that start with these bytes. By changing k, you can adjust
+memory consumption against scanning speed. For the current database, I
+measured these values on my Athlon 2100+ for a 200 MiB file:<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top;">k<br>
+      </th>
+      <th style="vertical-align: top;">memory<br>
+      </th>
+      <th style="vertical-align: top;">speed<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">2<br>
+      </td>
+      <td style="vertical-align: top;">12 MiB<br>
+      </td>
+      <td style="vertical-align: top;">3.3 MiB/sec<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">3<br>
+      </td>
+      <td style="vertical-align: top;">30 MiB<br>
+      </td>
+      <td style="vertical-align: top;">11 MiB/sec<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+So speed or memory, choose one, but you cannot have both. ClamAV uses
+k=2 in its current implementation.<br>
+<h2>Wildcards</h2>
+ScannerDaemon 0.5.2 was only able to scan for byte sequences. For some
+malwares, you need wildcards to detect them. ScannerDaemon 0.6.0
+supports two types of wildcards: "??" for one arbitrary byte and "*"
+for any number of arbitrary bytes. Detecting these patterns is easy:
+for ?? there is a list called "skipbytes" that indicates which bytes to
+skip. The pattern 010203????0607 would result in a skiplist of 3/2/2
+meaning "scan 3 bytes, skip 2 bytes, scan 2 bytes". The current
+implementation crashes, if you have a pattern like "010203??" as I
+omitted the check. Simply don't do such non-sense, but a check upon
+pattern reading would fix this.<br>
+<br>
+I had a look at ClamAV's implementation: it uses a special value to
+indicate a wildcard. This has two disadvantages:<br>
+<ol>
+  <li>You have to store the pattern in a way to represent 256 + 1
+values, so you cannot use bytes or at least have to escape them. ClamAV
+uses a larger data type and therefore doubles the memory needed to
+store the patterns. With a skiplist, you only need 2 bytes for every
+change between value and wildcard which is much better.</li>
+  <li>You have to scan every byte even if it is a sequence of
+wildcards. With the skiplist, you simply skip all bytes which "match"
+the wildcards which is much faster.<br>
+  </li>
+</ol>
+Detecting "*" uses a different approach: the pattern is split into
+several individual patterns which are detected like normal patterns.
+Each of them contains a sequence number. For every file, there is an
+array containing the sequence number of the of the last found pattern.
+If a pattern has been found, its sequence number is checked against
+this value. Only if its number is the number in the array + 1, its
+number is stored in the array. This way it is made sure that the
+patterns appear in the correct sequence. If the last pattern has been
+found, you have it. To optimize things, the sequence number is checked
+before the pattern is compared to the bytes of the file. This way the
+following patterns have nearly no performance impact.<br>
+<h2>Matcharray</h2>
+If you see the values of k in the table above, you see that the trie is
+used only for scanning 2 bytes. This is a lot of work just to see if
+any pattern starts with 2 given bytes! The matcharray algorithm
+therefore does not use a trie but an array with size 256*256 = 65536.
+For every 2 byte combination, it contains a list of patterns that start
+with these bytes. On 32-bit machines, this means that this array
+consumes 256 KiB of ram which is acceptable and is much less than the
+trie does. The current version only needs 4.5 MiB of ram compared to 12
+MiB with trie. While the matcharray does not keep the information about
+what you read as Aho-Corasick does, it is still faster, as you only
+have to do a bit of bit shifting and one array access for every byte
+read. It does also make the code a lot less complicated.<br>
+<h2>PatternOptimizer</h2>
+If you think about the length of k and scanning speed, you might think
+that 20,000 patterns and k=3 gives 16 million possible 3 byte sequences
+with at most 20,000 of then actually being the start of a pattern (it
+is even less as there are a lot of patterns starting with the same 3
+bytes). You have a chance of 20,000 / 16 million = 0,12% that a given 3
+byte sequence matches, so you should have a match on average every 420
+bytes. But tests have shown that for actual files this is more like a
+hit every 11 bytes. Where does this come from? For executable files,
+the byte sequences are not evenly distributed: if you have some
+calculating instruction, there must be a "load data" instruction coming
+first. The same applies to standard constructs like method calls and
+loops. So some byte sequences appearch much more often than others.
+Unfortunately, malwares are also executable files and therefore have
+the same distribution. So it is very likely that a pattern starts with
+a sequence that happens to appear very often in executables.<br>
+<br>
+But the worst byte sequence is just zero (00). Executables do often
+contain large sections of zeros. If a pattern starts with this, you
+have a lot of hits with a big impact on scanning speed. Therefore I
+decided to remove all leadings zeros on the pattens which doubled
+scanning speed! The current ClamAV database still does not contain any
+pattern starting with 00.<br>
+<br>
+But there is a better solution for this problem that allows patterns
+starting with zeros and speeds up scanning a lot. Why only look for the
+first 2 bytes of the pattern? Every 2 bytes of the pattern are suited
+for this as well! So what PatternOptimizer does first a frequency
+analysis of (executable-)files. This is a table indicating how often
+every byte sequence appears. For 3 byte sequences and Linux
+executables, only about 18% of all possible combinations are used (for
+2 byte sequences, all are used which is not very surprising). After
+calculating the frequencies, it looks at the pattern and determines the
+byte sequence with the lowest frequency and marks this as the one to
+look for. The longer the pattern the better are the chance to find a
+sequence with a very low frequency. For the 200 MiB file, scanning for
+the first 3 bytes gave about 9 million matches. After optimizing, this
+was down to less than 6000 matches. As each match means "do slow linear
+search", this speeds up scanning a lot!<br>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top;">memory<br>
+      </th>
+      <th style="vertical-align: top;">speed<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">4.5 MiB<br>
+      </td>
+      <td style="vertical-align: top;">16 MiB/sec<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+So compared to the k=3 trie of ScannerDaemon 0.5.2 the new version uses
+only 15% of the ram and is 40% faster. Compared to ClamAV 0.70, it uses
+2.5 MiB more ram due to the overhead of the Java virtual machine and is
+6 times faster.<br>
+<br>
+Handling matches is a bit more complicated, as you do not scan the
+following bytes, but have to go backwards and start to match some bytes
+earlier. You even have to scan the same bytes twice if you run over
+them again. This can be optimized by putting these two bytes in the
+skiplist, but this is not done yet. If there are several sequences in
+the pattern with the same frequency, the algorithm uses the last one.
+This was done to remove the impact of scanning the same byte twice. It
+does also have a positive effect as you compare bytes that have a
+greater distance in the file. These bytes have a lower chance to match
+the bytes of the pattern as the "common sequences" for loops etc are
+very short.<br>
+<h2>Future</h2>
+How can scanning speed be further improved? A quick test showed that
+using only one pattern to look for is 3 times faster than using 20,000
+patterns. So the algorithm scales pretty well. You can improve speed by
+looking at the patterns with the most hits. Optimizing these to contain
+sequences with lower frequencies should reduce this factor 3.<br>
+<br>
+Another approach would be to add patterns with position information.
+This means that the pattern has information about where it can appear
+in the file. I am not quite comfortable with this as one single byte
+more before the occurence of the pattern would result in not detecting
+it. But as every virus author checks his "product" against current scan
+engines until it is not detected any more, this may not matter at all.
+If we can convert all of patterns to ones with positional information,
+scanning speed would be faster than O(n) as we do not need to read all
+bytes. But one pattern without this information means we have to scan
+the whole file, so is it worth the risk and efford if we only can be 3
+times faster?<br>
+<br>
+Reducing the matches is always a good idea. I cannot think of any
+solution but using more ram for the matcharray. You can easily look for
+3 bytes instead of 2 (if there is no pattern containing a sequence of
+only 2 bytes). You can even scan 2 bytes and some bits of the 3rd byte,
+so that you do not have to do the big step from array size 65536 to 16
+million. If you do this, using some CRC instead of just using some of
+the bits and dropping the rest would probably lower the number of
+matches but impact scanning speed as you have to calculate the CRC.
+Testing should show if it is worth or if is is better to have more
+matches.<br>
+<br>
+Kurt Huwig, June 2004<br>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>PatternOptimizer - Howto</title>
+</head>
+<body>
+<h1>PatternOptimizer Howto</h1>
+The PatternOptimizer optimizes the search point of patterns by first
+calculating byte sequence frequencies from a test file and then
+choosing points with the lowes frequency to reduce the number of hits
+while scanning.<br>
+<h2>Necessary software</h2>
+You need an installed Java 2 Runtime Environment, Standard Edition
+(JRE) . Every JRE &gt;= 1.2 should be fine, but I just tested it with
+1.4.2.
+You can get it from Sun at <a href="http://www.java.com/">http://www.java.com/</a>.<br>
+<h2>Usage</h2>
+You have to tell PatternOptimizer which test file and which pattern
+file to use. To generate a test file, simply concatenate a number of
+files together:<br>
+<pre>cat /bin/* /sbin/* /usr/bin/* /usr/sbin/* /lib/* /usr/lib/* &gt; test.bin</pre>
+Then optimize a given pattern file by running<br>
+<pre>java -jar PatternOptimizer.jar test.bin virus.db &gt; virus.strings<br></pre>
+<h2>Pattern files</h2>
+The pattern files consist of several lines, each containing a single
+signature. The format of the signature is<br>
+<pre>&lt;Malware name&gt;=&lt;pattern&gt;</pre>
+The &lt;Malware name&gt; may be an arbitrary string, but may not
+contain '=', '[', ']'. Something like 'Worm/CodeRed.2' is perfect. This
+pseudo BNF gives the syntax:<br>
+<pre>hex-digit	= one of '0-9, a-f'<br>hex-byte	= &lt;hex-digit&gt;&lt;hex-digit&gt;<br>wildcard	= ??<br>byte		= &lt;hex-byte&gt; | &lt;wildcard&gt;<br>single-pattern	= &lt;byte&gt; | &lt;single-pattern&gt; &lt;byte&gt; <br>multi-pattern	= &lt;single-pattern&gt; '*' &lt;single-pattern&gt;<br>pattern		= &lt;single-pattern&gt; | &lt;multi-pattern&gt;<br></pre>
+The first restriction is, that each &lt;single-pattern&gt; must contain
+a sequence of at least two consecutive &lt;hex-byte&gt;. The more bytes
+are in there - especially the first &lt;single-pattern&gt; of a
+&lt;multi-pattern&gt; - the faster the scan engine is. The second
+restriction is, that a &lt;single-pattern&gt; may not start or end with
+a wildcard (this does not make sense either).<br>
+<h3>Examples<br>
+</h3>
+<pre>Gen.12 Tricks-A2=BE640231944201D1C24E79F7</pre>
+<pre>W32.MyLife.E (Clam)=7A6172793230*40656D61696C2E636F6D</pre>
+<pre>W32.Hybris.C (Clam)=4000??????????????????????????83??????75F2E9????FFFF00000000</pre>
+<pre>1992 (Clam)=E9E60051BB??018A2F322E0301882F4381FB??047EF159C3BA0001*B440CD2153</pre>
+<h6>$Id: PatternOptimizer-Howto.html,v 1.1 2004/05/30 01:43:26 kurti Exp $<br>
+</h6>
+</body>
+</html>

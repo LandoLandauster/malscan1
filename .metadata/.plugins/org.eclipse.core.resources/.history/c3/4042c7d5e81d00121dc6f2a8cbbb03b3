@@ -1,0 +1,14 @@
+package test1;
+
+import java.util.Scanner;
+
+public class hello {
+	   public static void main(String[] args) {
+	        System.out.println("input username");
+	        Scanner input = new Scanner( System.in );
+	        String str = input.next();
+	        System.out.println(str);
+	    }
+
+	
+}

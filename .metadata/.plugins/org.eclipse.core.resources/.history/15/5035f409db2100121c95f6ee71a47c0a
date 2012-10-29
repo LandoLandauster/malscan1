@@ -1,0 +1,7 @@
+package desicion;
+
+public class Des {
+	public interface Des{
+		
+	}
+}

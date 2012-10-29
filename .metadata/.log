@@ -1,0 +1,42 @@
+!SESSION 2012-10-23 09:45:29.323 -----------------------------------------------
+eclipse.buildId=I20110613-1736
+java.version=1.6.0_24
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86
+
+!ENTRY com.android.ide.eclipse.adt 4 0 2012-10-23 09:49:44.717
+!MESSAGE Failed to load properties file for project 't1'
+
+!ENTRY org.eclipse.ui 4 4 2012-10-24 10:47:10.984
+!MESSAGE Invalid preference page path: XML Syntax
+!SESSION 2012-10-25 10:00:01.367 -----------------------------------------------
+eclipse.buildId=I20110613-1736
+java.version=1.6.0_24
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86
+
+!ENTRY org.eclipse.core.resources 2 10035 2012-10-25 10:00:09.632
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY org.eclipse.ui 4 4 2012-10-26 05:38:26.073
+!MESSAGE Invalid preference page path: XML Syntax
+!SESSION 2012-10-26 07:57:47.986 -----------------------------------------------
+eclipse.buildId=I20110613-1736
+java.version=1.6.0_24
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86
+
+!ENTRY org.eclipse.ui 4 4 2012-10-26 08:00:11.021
+!MESSAGE Invalid preference page path: XML Syntax
+!SESSION 2012-10-26 09:51:16.557 -----------------------------------------------
+eclipse.buildId=I20110613-1736
+java.version=1.6.0_24
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86
+
+!ENTRY org.eclipse.ui 4 4 2012-10-29 08:05:52.338
+!MESSAGE Invalid preference page path: XML Syntax

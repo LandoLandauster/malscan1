@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Credo FAQ</title>
+      
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+</head>
+  <body>
+ 
+<h1>Credo FAQ<br>
+ </h1>
+ 
+<h2>What are Credo files?</h2>
+ Credo files contain the necessary information for the scanner to detect
+viruses etc. They are digitally signed with a key that has been signed itself
+by the OpenAntivirus Project.<br>
+ 
+<h2>What means "digitally signed"?</h2>
+ The digital signature assures, that noone modified the file on the way from 
+the one who signed it to you. I also makes sure, that noone else created the
+file. It has not influence on the quality of the file or the accuracy of
+the information in the file. The data cannot be tampered, but it still can
+be nonsense.<br>
+ 
+<h2>How can I trust the signatures?</h2>
+ Digital signatures rely on trust relationships between you and the one who 
+signed the Credo file. Under real world conditions, you do not know the one 
+who created the file. Therefore two steps are necessary. Every software from 
+the OpenAntivirus project knows the master keys of the project maintainers. 
+The maintainers sign the keys from everyone who wants to create a Credo file. 
+If you get a Credo file, it contains the signed key with which the software 
+checks the integrity of the Credo file. It does also check the validy of the
+signature on the key. If both succeeds, then the software trusts the Credo
+file.<br>
+ 
+<h2>How do I know who signed the Credo file?</h2>
+ Each signed key contains a description of the owner. It contains<br>
+ 
+<ul>
+   <li>country</li>
+   <li>state</li>
+   <li>city</li>
+   <li>organization</li>
+   <li>organizational unit</li>
+   <li>email address</li>
+   <li>name</li>
+ 
+</ul>
+ This information is signed, too and therefore cannot be altered by third 
+parties.<br>
+ 
+<h2>What are the different signature levels?</h2>
+ The OpenAntivirus project has to make sure, that the description of the
+key contains correct information. As we cannot meet everyone in person, we
+have different level to match the different relationships.<br>
+ <br>
+ 
+<ol>
+   <li>Level: the signer received the key via plain email</li>
+   <li>Level: the signer received the key via an untrusted signed GPG message 
+ verified with a key from a keyserver</li>
+   <li>Level: the signer received the key via a trusted signed GPG message</li>
+   <li>Level: the signer received the key personal and has verified the identity</li>
+ 
+</ol>
+ 
+<h2>Which signature levels are accepted? How can I change this?</h2>
+ Every software from the OpenAntivirus project trusts all signatures of level 
+3 and 4. You can use command line options to reduce the necessary minimum 
+level or even completely disable the signature checking.<br>
+ 
+<h2>How can I generate a signing key? How can I get it signed by the project?</h2>
+ There is a separate documentation about how to generate the keys and even 
+replace the master keys (which you do not really want, as you cannot use any
+standard Credo file afterwards). Send your keys to us und we will sign them.
+Depending on our relationship to you, you will get assigned a certain level
+(see above).<br>
+<h2>How can I generate an unsigned Credo file? How to I use it?</h2>
+You can create your own credo files. Either read the Credo-Howto on how  to
+create a "real" credo file or do the easy way: <br>
+<ol>
+  <li>Create a signature text-file and name it e.g. "mysignatures.strings"
+(the suffix  is important!)</li>
+  <li>ZIP them into a file with suffix ".credo":<br>
+    <pre>zip mysignatures.credo *.strings</pre>
+  </li>
+  <li>Copy this in the subdirectory "credo" where you start ScannerDaemon,
+ or give it on the commandline (just one filename is allowed in the  current
+version).</li>
+  <li>Use the option '-nosignature' when you start ScannerDaemon<br>
+  </li>
+</ol>
+ 
+<h6>$Id: Credo-FAQ.html,v 1.2 2002/04/15 10:43:40 kurti Exp $</h6>
+ 
+</body>
+</html>

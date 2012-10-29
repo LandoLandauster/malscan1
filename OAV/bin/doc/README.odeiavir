@@ -1,0 +1,5 @@
+When using ScannerDaemon from OdeiaVir, make sure ScannerDaemon runs on
+the same machine on which local delivery takes place, and is started
+before Qmail.
+
+http://virus.isverybad.org/

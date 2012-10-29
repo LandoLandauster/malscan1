@@ -1,0 +1,186 @@
+<!-- $Id: build.xml,v 1.20 2004/05/31 17:48:17 kurti Exp $ -->
+<project name="OpenAntiVirus" default="all" basedir=".">
+  <property name="src"        value="src"/>
+  <property name="build"      value="build"/>
+  <property name="dist"       value="dist"/>
+  <property name="doc"        value="doc"/>
+  <property name="bin"        value="bin"/>
+  <property name="signatures" value="signatures"/>
+  <property name="certs"      value="certificates"/>
+  <property name="debug"      value="true"/>
+  <property name="debuglevel" value="lines,vars,source"/>
+
+  
+  <target name="all" depends="compile"/>
+  
+  <target name="init">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build}/classes"/>
+  </target>
+  
+  <target name="dist-init">
+    <mkdir dir="${dist}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}/classes"
+           includes="org/openantivirus/**/*.java"
+           excludes="**/*Test.java,**/*Suite.java"
+	   debug="${debug}" debuglevel="${debuglevel}"/>
+  </target>
+  
+  <target name="clean">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete>
+      <fileset dir="." includes="**/*~" defaultexcludes="no"/>
+      <fileset dir="${src}" includes="**/*.class"/>
+    </delete>
+  </target>
+
+  <target name="virushammer" depends="init">
+    <javac srcdir="${src}" destdir="${build}/classes"
+           includes="org/openantivirus/virushammer/VirusHammer.java"
+	   debug="${debug}" debuglevel="${debuglevel}"/>
+  </target>
+  
+  <target name="virushammer-dist">
+    <delete dir="${build}"/>
+    <antcall target="virushammer"/>
+    <antcall target="dist-init"/>
+    <jar jarfile="${dist}/VirusHammer.jar"
+         manifest="src/org/openantivirus/manifest/VirusHammer.manifest">
+      <fileset dir="${build}/classes">
+        <include name="**/*.class"/>
+      </fileset>
+      <fileset dir="${src}">
+        <include name="org/openantivirus/virushammer/VirusHammer*.properties"/>
+      </fileset>
+      <fileset dir="${certs}">
+        <include name="*.cer.level*"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="dist" depends="compile">
+    <mkdir dir="${dist}"/>
+    
+    <jar jarfile="${dist}/PatternFinder.jar"
+         manifest="src/org/openantivirus/manifest/PatternFinder.manifest">
+      <fileset dir="${build}/classes">
+        <include name="org/openantivirus/ole/*.class"/>
+        <include name="org/openantivirus/util/PatternFinder*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${dist}/PatternOptimizer.jar"
+         manifest="src/org/openantivirus/manifest/PatternOptimizer.manifest">
+      <fileset dir="${build}/classes">
+        <include name="org/openantivirus/engine/credo/WildcardPattern*.class"/>
+        <include name="org/openantivirus/util/PatternOptimizer*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${dist}/ScannerDaemon.jar"
+         manifest="src/org/openantivirus/manifest/ScannerDaemon.manifest">
+      <fileset dir="${build}/classes">
+        <include name="org/openantivirus/daemon/**/*.class"/>
+        <include name="org/openantivirus/engine/**/*.class"/>
+      </fileset>
+      <fileset dir="${certs}">
+        <include name="*.cer.level*"/>
+      </fileset>
+    </jar>
+
+    <zip zipfile="${dist}/ScannerDaemon.zip">
+      <fileset dir="${dist}">
+        <include name="ScannerDaemon.jar"/>
+      </fileset>
+      <fileset dir="${bin}">
+        <include name="update.sh"/>
+      </fileset>
+      <fileset dir="${doc}">
+        <include name="ScannerDaemon-Howto.html"/>
+        <include name="ScannerDaemon-Changes.html"/>
+        <include name="README.*"/>
+        <include name="COPYING"/>
+        <include name="COPYRIGHT"/>
+      </fileset>
+      <fileset dir=".">
+        <include name="ScannerDaemon-settings.properties"/>
+      </fileset>
+    </zip>
+
+    <zip zipfile="${dist}/ScannerDaemon-src.zip">
+      <fileset dir="../..">
+        <include name="openantivirus/java/build.xml"/>
+        <include name="openantivirus/java/${src}/org/openantivirus/**/*.manifest"/>
+        <include name="openantivirus/java/${src}/org/openantivirus/**/*.java"/>
+        <include name="openantivirus/java/${bin}/update.sh"/>
+        <include name="openantivirus/java/${doc}/ScannerDaemon-Changes.html"/>
+        <include name="openantivirus/java/${doc}/ScannerDaemon-Howto.html"/>
+        <include name="openantivirus/java/${doc}/README.*"/>
+        <include name="openantivirus/java/${doc}/COPYING"/>
+        <include name="openantivirus/java/${doc}/COPYRIGHT"/>
+      </fileset>
+    </zip>
+
+    <zip zipfile="${dist}/PatternFinder.zip">
+      <fileset dir="${dist}">
+        <include name="PatternFinder.jar"/>
+      </fileset>
+      <fileset dir="${doc}">
+        <include name="PatternFinder-Howto.html"/>
+        <include name="PatternFinder-Changes.html"/>
+        <include name="COPYING"/>
+        <include name="COPYRIGHT"/>
+      </fileset>
+      <fileset dir=".">
+        <include name="src/org/openantivirus/util/PatternFinder.java"/>
+      </fileset>
+    </zip>
+
+    <zip zipfile="${dist}/PatternOptimizer.zip">
+      <fileset dir="${dist}">
+        <include name="PatternOptimizer.jar"/>
+      </fileset>
+      <fileset dir="${doc}">
+        <include name="PatternOptimizer-Howto.html"/>
+        <include name="COPYING"/>
+        <include name="COPYRIGHT"/>
+      </fileset>
+      <fileset dir=".">
+        <include name="src/org/openantivirus/util/PatternOptimizer.java"/>
+      </fileset>
+    </zip>
+
+    <antcall target="virushammer-dist"/>
+    <zip zipfile="${dist}/VirusHammer.zip">
+      <fileset dir="${dist}">
+        <include name="VirusHammer.jar"/>
+      </fileset>
+      <fileset dir="${doc}">
+        <include name="VirusHammer-Howto.html"/>
+        <include name="VirusHammer-Changes.html"/>
+        <include name="COPYING"/>
+        <include name="COPYRIGHT"/>
+      </fileset>
+      <fileset dir="${bin}">
+        <include name="virushammer*.sh"/>
+        <include name="virushammer*.bat"/>
+      </fileset>
+    </zip>
+
+    <jar jarfile="${dist}/VirusSignatures.zip">
+      <fileset dir="${signatures}">
+        <include name="**/*.credo"/>
+      </fileset>
+      <fileset dir="${doc}">
+        <include name="Credo-Howto.html"/>
+        <include name="Credo-FAQ.html"/>
+        <include name="COPYING"/>
+        <include name="COPYRIGHT"/>
+      </fileset>
+    </jar>
+  </target>
+</project>

@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>OAV scan engine</title>
+</head>
+<body>
+<h1>Technical Data</h1>
+<h2>Supported archive/compression formats</h2>
+<br>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left;">
+  <tbody>
+    <tr>
+      <th style="vertical-align: top;">Format<br>
+      </th>
+      <th style="vertical-align: top;">Necessary executable<br>
+      </th>
+      <th style="vertical-align: top;">Comment<br>
+      </th>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">ace<br>
+      </td>
+      <td style="vertical-align: top;">unace<br>
+      </td>
+      <td style="vertical-align: top;">ACE archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">ar<br>
+      </td>
+      <td style="vertical-align: top;">ar<br>
+      </td>
+      <td style="vertical-align: top;">ar archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">arc<br>
+      </td>
+      <td style="vertical-align: top;">arc<br>
+      </td>
+      <td style="vertical-align: top;">ARC archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">arj<br>
+      </td>
+      <td style="vertical-align: top;">unarj<br>
+      </td>
+      <td style="vertical-align: top;">ARJ archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">cab<br>
+      </td>
+      <td style="vertical-align: top;">cabextract<br>
+      </td>
+      <td style="vertical-align: top;">Microsoft cabinet archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">cpio<br>
+      </td>
+      <td style="vertical-align: top;">cpio<br>
+      </td>
+      <td style="vertical-align: top;">cpio archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">compress<br>
+      </td>
+      <td style="vertical-align: top;">uncompress<br>
+      </td>
+      <td style="vertical-align: top;">Unix compress<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">dact<br>
+      </td>
+      <td style="vertical-align: top;">dact<br>
+      </td>
+      <td style="vertical-align: top;">DACT compressor<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">dar<br>
+      </td>
+      <td style="vertical-align: top;">dar<br>
+      </td>
+      <td style="vertical-align: top;">DAR archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">bzip2<br>
+      </td>
+      <td style="vertical-align: top;">bunzip2<br>
+      </td>
+      <td style="vertical-align: top;">BZIP2 compressor<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">gzip<br>
+      </td>
+      <td style="vertical-align: top;">&lt;built-in&gt;<br>
+      </td>
+      <td style="vertical-align: top;">GNU Zip compressor<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">lha<br>
+      </td>
+      <td style="vertical-align: top;">lha<br>
+      </td>
+      <td style="vertical-align: top;">LHA archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">lzop<br>
+      </td>
+      <td style="vertical-align: top;">lzop<br>
+      </td>
+      <td style="vertical-align: top;">LZOP compressor<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">ppmd<br>
+      </td>
+      <td style="vertical-align: top;">PPMd<br>
+      </td>
+      <td style="vertical-align: top;">PPMd compressor<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">rar<br>
+      </td>
+      <td style="vertical-align: top;">unrar<br>
+      </td>
+      <td style="vertical-align: top;">RAR archiver (archive &amp;
+self-extracting)<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">rpm<br>
+      </td>
+      <td style="vertical-align: top;">rpm2cpio &amp; cpio<br>
+      </td>
+      <td style="vertical-align: top;">RedHat package manager<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">shar<br>
+      </td>
+      <td style="vertical-align: top;">unshar<br>
+      </td>
+      <td style="vertical-align: top;">Shell archive<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">tar<br>
+      </td>
+      <td style="vertical-align: top;">tar<br>
+      </td>
+      <td style="vertical-align: top;">Unix tape archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">tnef<br>
+      </td>
+      <td style="vertical-align: top;">tnef<br>
+      </td>
+      <td style="vertical-align: top;">Microsoft TNEF archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">upx<br>
+      </td>
+      <td style="vertical-align: top;">&lt;build-in&gt; &amp; upx<br>
+      </td>
+      <td style="vertical-align: top;">UPX exe packer<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">uuencode<br>
+      </td>
+      <td style="vertical-align: top;">uudecode<br>
+      </td>
+      <td style="vertical-align: top;">uu-encoder<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">zip<br>
+      </td>
+      <td style="vertical-align: top;">&lt;built-in&gt;<br>
+      </td>
+      <td style="vertical-align: top;">ZIP archiver<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">zoo<br>
+      </td>
+      <td style="vertical-align: top;">unzoo<br>
+      </td>
+      <td style="vertical-align: top;">ZOO archiver<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+</body>
+</html>

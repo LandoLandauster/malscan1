@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;test&apos;&#x0A;- Original project: &apos;test&apos;&#x0A;- Original element: &apos;postgresql-9.1-903.jdbc3.jar&apos;" description="Delete element" element1="src/postgresql-9.1-903.jdbc3.jar" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="1" stamp="1351090611511" subPackages="false" version="1.0"/>
+</session>
